@@ -1,0 +1,88 @@
+---
+title: "Class 5: Data Visualization with ggplot"
+author: "Barry (PID: 911)"
+format: pdf
+---
+
+## Using GGPLOT
+
+To use ggplot2 we first need to install it on our computers. To do this we will use the function `install.packages()`.
+
+Before I use any package functions I have to load them up with a `library()` call, like so:
+
+```{r}
+library(ggplot2)
+ggplot(cars)
+```
+```{r}
+#| eval: false
+head(cars)
+```
+There is always the "base R" graphics system, i.e. `plot()`
+
+```{r}
+
+plot(cars)
+```
+To use ggplot I need to spell out at least 3 things:
+- data (the stuff I want to plot as a data.frame)
+- aesthetics (aes() values - how the data map to the plot).
+- geoms (how I want things drawn)
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) +
+  geom_point() + 
+  geom_smooth(method="lm")
+```
+
+## Section 6
+
+Adding more layers to a scatter plot
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) +
+  geom_point() + 
+  geom_smooth(method="lm") +
+  labs(title = "Stopping Distance of some old cars",
+       subtitle = "Some caption",
+       x="Speed (MPH)",
+       y="Distance (ft)",
+       caption = "My fun caption") + 
+  theme_bw()
+```
+
+## Expression data example
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+```
+
+
+Q. How many genes are there?
+
+```{r}
+nrow(genes)
+```
+
+There are `r nrow(genes)` in this silly dataset.
+
+
+Q. How many are "up"
+
+```{r}
+sum(genes$State == "up")
+```
+
+There are `r sum(genes$State == "up")` "UP" regulated genes in this dataset.
