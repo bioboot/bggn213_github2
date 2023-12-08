@@ -1,0 +1,141 @@
+---
+title: "Class09: Machine Learning mini project"
+author: "Barry"
+format: html
+---
+
+In today's lab we will examine some breast cancer biopsy data and apply our clustering and PCA methods to see what we can learn.
+
+```{r}
+wisc.df <- read.csv("WisconsinCancer.csv", row.names = 1)
+head(wisc.df)
+```
+
+```{r}
+skimr::skim(wisc.df)
+```
+
+Store diagnosis column for later use we will exclude this from our dataset for analysis
+
+```{r}
+# Create diagnosis vector for later and rm this 1st col
+diagnosis <- as.factor( wisc.df$diagnosis )
+wisc.data <- wisc.df[,-1]
+```
+
+> Q1. How many observations are in this dataset?
+
+```{r}
+nrow(wisc.df)
+```
+
+> Q2. How many of the observations have a malignant diagnosis?
+
+```{r}
+sum(wisc.df$diagnosis=="M")
+```
+
+```{r}
+table(wisc.df$diagnosis)
+```
+
+> Q3. How many variables/features in the data are suffixed with _mean?
+
+```{r}
+length( grep("_mean", colnames(wisc.df), value=T) )
+
+#colnames(wisc.df)
+```
+
+# 2. Principal Component Analysis
+
+We need to use `scale=TRUE` here as shown above with our `skim()` report. We could also look at the sd and mean of our columns and see they are on very different scales.
+
+```{r}
+wisc.pr <- prcomp(wisc.data , scale=TRUE )
+summary(wisc.pr)
+
+```
+
+Our first PC plot of PC1 vs PC2 colored by the expert diagnosis...
+
+```{r}
+#wisc.pr$x
+plot(wisc.pr$x[,1], wisc.pr$x[,2], col=as.factor(diagnosis))
+```
+
+> Q4. From your results, what proportion of the original variance is captured by the first principal components (PC1)?
+
+
+```{r}
+v <- summary(wisc.pr)
+pcvar<- v$importance[3,]
+pcvar["PC1"]
+```
+```{r}
+# How many PCs to get 0.7 or more
+which(pcvar >= 0.7)[1]
+
+```
+
+
+```{r}
+v <- summary(wisc.pr)
+pcvar <- v$importance[3,]
+pcvar["PC1"]
+```
+
+
+
+> Q5. How many principal components (PCs) are required to describe at least 70% of the original variance in the data?
+
+```{r}
+which(pcvar > 0.7)[1]
+```
+
+> Q6. How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
+
+```{r}
+which(pcvar > 0.9)[1]
+```
+
+# Clustering in PC space
+
+I will pick 3 PCs here for further analysis but you can use more (e.g. include 90% variance etc.). It is your choice here.
+
+```{r}
+d.pc <- dist( wisc.pr$x[,1:3] )
+wisc.pr.hc <- hclust(d.pc, method="ward.D2")
+```
+
+```{r}
+plot(wisc.pr.hc)
+```
+
+```{r}
+grps <- cutree(wisc.pr.hc, k=2)
+table(grps)
+```
+
+```{r}
+table(diagnosis)
+```
+
+```{r}
+table(diagnosis, grps)
+```
+
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2], col=grps)
+```
+And a 3D plot
+
+```{r}
+library(rgl)
+
+plot3d(wisc.pr$x[,1:3], xlab="PC 1", ylab="PC 2", zlab="PC 3", cex=1.5, size=1, type="s", col=grps)
+
+```
+
+
+
